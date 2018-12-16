@@ -264,7 +264,7 @@
 
             var idaddartikel = document.getElementById('idaddartikel')
             idaddartikel.addEventListener('click',function(){
-                var API_URLs = "https://bookmarks-apis.herokuapp.com/api/articles/";
+                var API_URLs = "https://bookmarks-apis.herokuapp.com/api/article-categories/";
                 axios
                     .get(API_URLs)
                     .then(formaddartikel)
@@ -552,10 +552,14 @@
                 var answer = confirm("apa anda ingin menambahkannya ?");
                 if (answer) {
                         var inputtitle = document.getElementById('idinputtitle').value
+                        var kategori = document.getElementById('selectkategori').value
+                        var deskripsi = CKEDITOR.instances["editor1"].getData();
                         var artikeliurl = "https://bookmarks-apis.herokuapp.com/api/articles/"
                         axios
                         .post(artikeliurl, {
-                        title: inputtitle
+                        title: inputtitle,
+                        description: deskripsi,
+                        categories: [kategori]
                         })
                         .then()
                         .catch(tampungError);
