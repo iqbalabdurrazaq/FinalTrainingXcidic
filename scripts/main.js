@@ -553,7 +553,7 @@
                 if (answer) {
                         var inputtitle = document.getElementById('idinputtitle').value
                         var kategori = document.getElementById('selectkategori').value
-                        var deskripsi = CKEDITOR.instances["editor1"].getData();
+                        var deskripsi = document.getElementById('editor1').value
                         var artikeliurl = "https://bookmarks-apis.herokuapp.com/api/articles/"
                         axios
                         .post(artikeliurl, {
