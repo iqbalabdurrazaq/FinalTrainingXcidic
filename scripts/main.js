@@ -213,6 +213,18 @@
                 iconDelete.setAttribute('class','fa  fa-trash');
                 td8.appendChild(iconDelete);
 
+                td8.addEventListener('click',function(){
+                    var pemberitahuan = confirm('Do you really want to delete article "'+artikel[index].title+'" ?');
+                    if (pemberitahuan){
+                      var API_URL = "https://bookmarks-apis.herokuapp.com/api/articles/"+artikel[index]._id+"/"
+                      axios
+                        .delete(API_URL)
+                        .then()
+                        .catch(tampungError);
+                      slashpageaddartikel()
+                    }
+                  })
+
                 td6.style.color = "green";
                 td7.style.color = "orange";
                 td8.style.color = "red";
@@ -249,6 +261,15 @@
             headercontent.appendChild(h1);
             contentWrapper.appendChild(headercontent);
             contentWrapper.appendChild(isicontent);
+
+            var idaddartikel = document.getElementById('idaddartikel')
+            idaddartikel.addEventListener('click',function(){
+                var API_URLs = "https://bookmarks-apis.herokuapp.com/api/articles/";
+                axios
+                    .get(API_URLs)
+                    .then(formaddartikel)
+                    .catch(tampungError);
+            })
 
         }, 300);
     }
@@ -366,7 +387,7 @@
                           })
                           .catch(tampungError);
         
-                          listkategori(response);
+                          slashpagedeletekategori();
                     }
                 })
 
@@ -413,6 +434,146 @@
         }, 300);
     }
 
+    function formaddartikel(response){
+        clearContent();
+        let artikel = response.data;
+        setTimeout(function() {
+            removeLoad()
+            var h1 = document.createElement("h1");
+            h1.innerText = "Add Artikel";
+
+            var row = document.createElement("row");
+            row.setAttribute("class","row");
+
+            var col = document.createElement("div");
+            col.setAttribute("class","col-md-12 col-sm-12 col-xs-12");
+
+            var box = document.createElement("div");
+            box.setAttribute("class","box");
+
+            var boxbody = document.createElement("div");
+            boxbody.setAttribute("class","box-body");
+
+            var boxfooter = document.createElement("div");
+            boxfooter.setAttribute("class","box-footer");
+
+            var form = document.createElement('form');
+            form.setAttribute("role","form")
+            form.setAttribute('id','formadd');
+
+            var formgroup = document.createElement("div");
+            formgroup.setAttribute("class","form-group");
+
+            var formgroup2 = document.createElement("div");
+            formgroup2.setAttribute("class","form-group");
+
+            var formgroup3 = document.createElement("div");
+            formgroup3.setAttribute("class","form-group");
+
+            var label = document.createElement("label");
+            label.setAttribute("for","exampleInputTitle");
+            label.innerText = "Title"
+            
+            var label2 = document.createElement("label");
+            label2.setAttribute("for","exampleInputTitle");
+            label2.innerText = "Category"
+
+            var label3 = document.createElement("label");
+            label3.setAttribute("for","exampleInputTitle");
+            label3.innerText = "Deskripsi"
+
+            var inputtitle = document.createElement("input");
+            inputtitle.setAttribute("class","form-control")
+            inputtitle.setAttribute("type","text")
+            inputtitle.id = "idinputtitle";
+            inputtitle.setAttribute("required","required")
+            inputtitle.setAttribute("placeholder","Masukkan Kategori")
+
+            var selectkategori = document.createElement("select");
+            selectkategori.setAttribute("class","form-control select2");
+            selectkategori.style.width = "100%"
+            selectkategori.id = "selectkategori"
+            selectkategori.required = "required"
+
+            var optionkategori = document.createElement("option");
+            optionkategori.setAttribute('value','')
+            optionkategori.innerText="Select Kategori.."
+            selectkategori.appendChild(optionkategori)
+
+            for( let index = 0 ;index < artikel.length;index++){
+                var isioption = document.createElement('option')
+                isioption.setAttribute('value',artikel[index]._id)
+                isioption.innerText = artikel[index].title
+                selectkategori.appendChild(isioption)
+            }
+
+            var editorkategori = document.createElement("textarea");
+            editorkategori.id = "editor1"
+            editorkategori.name = "editor1"
+            editorkategori.rows = "10"
+            editorkategori.cols = "170"
+
+            var btnsubmit = document.createElement("button");
+            btnsubmit.setAttribute("class","btn btn-primary");
+            btnsubmit.setAttribute("type","submit");
+            btnsubmit.id = "idbtnsubmit";
+            btnsubmit.innerText = "Add Artikel"
+
+            formgroup.appendChild(label);
+            formgroup.appendChild(inputtitle);
+            formgroup2.appendChild(label2);
+            formgroup2.appendChild(selectkategori);
+            formgroup3.appendChild(label3);
+            boxbody.appendChild(formgroup);
+            boxbody.appendChild(formgroup2);
+            boxbody.appendChild(formgroup3);
+            boxbody.appendChild(editorkategori)
+            boxfooter.appendChild(btnsubmit);
+            form.appendChild(boxbody);
+            form.appendChild(boxfooter);
+            box.appendChild(form);
+            col.appendChild(box);
+            row.appendChild(col);
+            isicontent.appendChild(row);
+            headercontent.appendChild(h1);
+            contentWrapper.appendChild(headercontent);
+            contentWrapper.appendChild(isicontent);
+
+            var formadd = document.getElementById("formadd");
+            formadd.addEventListener("submit", function(event) {
+                var tmp=0;
+                for( let index = 0 ;index < artikel.length; index++){
+                    var inputtitle = document.getElementById('idinputtitle').value
+                    if ( artikel[index].title.toLowerCase() == inputtitle.toLowerCase() ){
+                        tmp++;
+                    }
+                }
+                if(tmp == 0){
+                var answer = confirm("apa anda ingin menambahkannya ?");
+                if (answer) {
+                        var inputtitle = document.getElementById('idinputtitle').value
+                        var artikeliurl = "https://bookmarks-apis.herokuapp.com/api/articles/"
+                        axios
+                        .post(artikeliurl, {
+                        title: inputtitle
+                        })
+                        .then()
+                        .catch(tampungError);
+                        
+                        slashpageaddartikel();
+                        event.preventDefault();
+                    }else{
+                        event.preventDefault();
+                    }
+                }else{
+                alert("Sorry, this Artikel title already exists")
+                event.preventDefault();
+                }
+            });
+
+        }, 300);
+    }
+
     function formaddkategori(response){
         clearContent();
         let kategori = response.data;
@@ -445,6 +606,7 @@
 
             var label = document.createElement("label");
             label.setAttribute("for","exampleInputTitle");
+            label.innerText = "Title"
 
             var inputtitle = document.createElement("input");
             inputtitle.setAttribute("class","form-control")
@@ -477,33 +639,221 @@
             formadd.addEventListener("submit", function(event) {
                 var tmp=0;
                 for( let index = 0 ;index < kategori.length; index++){
-                var inputtitle = document.getElementById('idinputtitle').value
-                if ( kategori[index].title.toLowerCase() == inputtitle.toLowerCase() ){
-                    tmp++;
-                }
+                    var inputtitle = document.getElementById('idinputtitle').value
+                    if ( kategori[index].title.toLowerCase() == inputtitle.toLowerCase() ){
+                        tmp++;
+                    }
                 }
                 if(tmp == 0){
                 var answer = confirm("apa anda ingin menambahkannya ?");
                 if (answer) {
-                    var inputtitle = document.getElementById('idinputtitle').value
-                    var kategoriurl = "https://bookmarks-apis.herokuapp.com/api/article-categories/"
-                    axios
-                    .post(kategoriurl, {
-                    title: inputtitle
-                    })
-                    .then()
-                    .catch(tampungError);
-                    
-                    listkategori(response);
-                    event.preventDefault();
-                }else{
-                    event.preventDefault();
-                }
+                        var inputtitle = document.getElementById('idinputtitle').value
+                        var kategoriurl = "https://bookmarks-apis.herokuapp.com/api/article-categories/"
+                        axios
+                        .post(kategoriurl, {
+                        title: inputtitle
+                        })
+                        .then()
+                        .catch(tampungError);
+                        
+                        slashpageaddkategori();
+                        event.preventDefault();
+                    }else{
+                        event.preventDefault();
+                    }
                 }else{
                 alert("Sorry, this category title already exists")
                 event.preventDefault();
                 }
             });
+
+        }, 300);
+    }
+
+    function slashpageaddartikel(){
+        clearContent();
+        setTimeout(function() {
+            removeLoad()
+
+            var row = document.createElement("row");
+            row.setAttribute("class","row");
+
+            var col = document.createElement("div");
+            col.setAttribute("class","col-md-12 col-sm-12 col-xs-12");
+
+            var box = document.createElement("div");
+            box.setAttribute("class","box");
+
+            var boxbody = document.createElement("div");
+            boxbody.setAttribute("class","box-body");
+
+            var boxfooter = document.createElement("div");
+            boxfooter.setAttribute("class","box-footer");
+
+            var h3 = document.createElement("h3");
+            h3.innerText = "Anda Berhasil Menambahkan, Silakan Kembali Ke List Artikel"
+
+            var btnsubmit = document.createElement("button");
+            btnsubmit.setAttribute("class","btn btn-primary");
+            btnsubmit.setAttribute("type","submit");
+            btnsubmit.id = "idbtnsubmit";
+            btnsubmit.innerText = "Back To List Artikel"
+
+            boxbody.appendChild(h3);
+            boxfooter.appendChild(btnsubmit);
+            box.appendChild(boxbody);
+            box.appendChild(boxfooter);
+            col.appendChild(box);
+            row.appendChild(col);
+            isicontent.appendChild(row);
+            contentWrapper.appendChild(isicontent);
+
+            var idbtnsubmit = document.getElementById('idbtnsubmit')
+            idbtnsubmit.addEventListener('click',function(){
+                var API_URL = "https://bookmarks-apis.herokuapp.com/api/articles/"
+                viewArtikel(API_URL)
+            })
+
+        }, 300);
+    }
+
+    function slashpageaddkategori(){
+        clearContent();
+        setTimeout(function() {
+            removeLoad()
+
+            var row = document.createElement("row");
+            row.setAttribute("class","row");
+
+            var col = document.createElement("div");
+            col.setAttribute("class","col-md-12 col-sm-12 col-xs-12");
+
+            var box = document.createElement("div");
+            box.setAttribute("class","box");
+
+            var boxbody = document.createElement("div");
+            boxbody.setAttribute("class","box-body");
+
+            var boxfooter = document.createElement("div");
+            boxfooter.setAttribute("class","box-footer");
+
+            var h3 = document.createElement("h3");
+            h3.innerText = "Anda Berhasil Menambahkan, Silakan Kembali Ke List Kategori"
+
+            var btnsubmit = document.createElement("button");
+            btnsubmit.setAttribute("class","btn btn-primary");
+            btnsubmit.setAttribute("type","submit");
+            btnsubmit.id = "idbtnsubmit";
+            btnsubmit.innerText = "Back To List Kategori"
+
+            boxbody.appendChild(h3);
+            boxfooter.appendChild(btnsubmit);
+            box.appendChild(boxbody);
+            box.appendChild(boxfooter);
+            col.appendChild(box);
+            row.appendChild(col);
+            isicontent.appendChild(row);
+            contentWrapper.appendChild(isicontent);
+
+            var idbtnsubmit = document.getElementById('idbtnsubmit')
+            idbtnsubmit.addEventListener('click',function(){
+                var API_URL = "https://bookmarks-apis.herokuapp.com/api/article-categories/"
+                viewKategori(API_URL)
+            })
+
+        }, 300);
+    }
+
+    function slashpagedeleteartikel(){
+        clearContent();
+        setTimeout(function() {
+            removeLoad()
+
+            var row = document.createElement("row");
+            row.setAttribute("class","row");
+
+            var col = document.createElement("div");
+            col.setAttribute("class","col-md-12 col-sm-12 col-xs-12");
+
+            var box = document.createElement("div");
+            box.setAttribute("class","box");
+
+            var boxbody = document.createElement("div");
+            boxbody.setAttribute("class","box-body");
+
+            var boxfooter = document.createElement("div");
+            boxfooter.setAttribute("class","box-footer");
+
+            var h3 = document.createElement("h3");
+            h3.innerText = "Anda Berhasil Menghapus, Silakan Kembali Ke List Artikel"
+
+            var btnsubmit = document.createElement("button");
+            btnsubmit.setAttribute("class","btn btn-primary");
+            btnsubmit.setAttribute("type","submit");
+            btnsubmit.id = "idbtnsubmit";
+            btnsubmit.innerText = "Back To List Artikel"
+
+            boxbody.appendChild(h3);
+            boxfooter.appendChild(btnsubmit);
+            box.appendChild(boxbody);
+            box.appendChild(boxfooter);
+            col.appendChild(box);
+            row.appendChild(col);
+            isicontent.appendChild(row);
+            contentWrapper.appendChild(isicontent);
+
+            var idbtnsubmit = document.getElementById('idbtnsubmit')
+            idbtnsubmit.addEventListener('click',function(){
+                var API_URL = "https://bookmarks-apis.herokuapp.com/api/articles/"
+                viewArtikel(API_URL)
+            })
+
+        }, 300);
+    }
+
+    function slashpagedeletekategori(){
+        clearContent();
+        setTimeout(function() {
+            removeLoad()
+
+            var row = document.createElement("row");
+            row.setAttribute("class","row");
+
+            var col = document.createElement("div");
+            col.setAttribute("class","col-md-12 col-sm-12 col-xs-12");
+
+            var box = document.createElement("div");
+            box.setAttribute("class","box");
+
+            var boxbody = document.createElement("div");
+            boxbody.setAttribute("class","box-body");
+
+            var boxfooter = document.createElement("div");
+            boxfooter.setAttribute("class","box-footer");
+
+            var h3 = document.createElement("h3");
+            h3.innerText = "Anda Berhasil Menghapus, Silakan Kembali Ke List Kategori"
+
+            var btnsubmit = document.createElement("button");
+            btnsubmit.setAttribute("class","btn btn-primary");
+            btnsubmit.setAttribute("type","submit");
+            btnsubmit.id = "idbtnsubmit";
+            btnsubmit.innerText = "Back To List Kategori"
+
+            boxbody.appendChild(h3);
+            boxfooter.appendChild(btnsubmit);
+            box.appendChild(boxbody);
+            box.appendChild(boxfooter);
+            col.appendChild(box);
+            row.appendChild(col);
+            isicontent.appendChild(row);
+            contentWrapper.appendChild(isicontent);
+
+            var idbtnsubmit = document.getElementById('idbtnsubmit')
+            idbtnsubmit.addEventListener('click',function(){
+                var API_URL = "https://bookmarks-apis.herokuapp.com/api/article-categories/"
+                viewKategori(API_URL)
+            })
 
         }, 300);
     }
