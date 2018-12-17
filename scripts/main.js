@@ -207,7 +207,11 @@
                 var iconEdit = document.createElement('i');
                 iconEdit.setAttribute('class','fa fa-edit');
                 td7.appendChild(iconEdit);
-                
+
+                td7.addEventListener('click',function(){
+                    var API_URL = "https://bookmarks-apis.herokuapp.com/api/articles/"+artikel[index]._id+"/"
+                    editArtikel(API_URL)
+                })                
                 
                 var iconDelete = document.createElement('i');
                 iconDelete.setAttribute('class','fa  fa-trash');
@@ -673,6 +677,163 @@
         }, 300);
     }
 
+    function formeditartikel(response){
+        clearContent();
+        let artikel = response.data;
+        let idartikel = artikel._id;
+        let idkategori = artikel.categories[0]._id
+        setTimeout(function() {
+            removeLoad()
+            var h1 = document.createElement("h1");
+            h1.innerText = "Edit Artikel";
+
+            var row = document.createElement("row");
+            row.setAttribute("class","row");
+
+            var col = document.createElement("div");
+            col.setAttribute("class","col-md-12 col-sm-12 col-xs-12");
+
+            var box = document.createElement("div");
+            box.setAttribute("class","box");
+
+            var boxbody = document.createElement("div");
+            boxbody.setAttribute("class","box-body");
+
+            var boxfooter = document.createElement("div");
+            boxfooter.setAttribute("class","box-footer");
+
+            var form = document.createElement('form');
+            form.setAttribute("role","form")
+            form.setAttribute('id','formadd');
+
+            var formgroup = document.createElement("div");
+            formgroup.setAttribute("class","form-group");
+
+            var formgroup2 = document.createElement("div");
+            formgroup2.setAttribute("class","form-group");
+
+            var formgroup3 = document.createElement("div");
+            formgroup3.setAttribute("class","form-group");
+
+            var label = document.createElement("label");
+            label.setAttribute("for","exampleInputTitle");
+            label.innerText = "Title"
+            
+            var label2 = document.createElement("label");
+            label2.setAttribute("for","exampleInputTitle");
+            label2.innerText = "Category"
+
+            var label3 = document.createElement("label");
+            label3.setAttribute("for","exampleInputTitle");
+            label3.innerText = "Deskripsi"
+
+            var inputtitle = document.createElement("input");
+            inputtitle.setAttribute("class","form-control")
+            inputtitle.setAttribute("type","text")
+            inputtitle.id = "idinputtitle";
+            inputtitle.setAttribute("value",artikel.title)
+            inputtitle.setAttribute("required","required")
+            inputtitle.setAttribute("placeholder","Masukkan Kategori")
+
+            var selectkategori = document.createElement("select");
+            selectkategori.setAttribute("class","form-control select2");
+            selectkategori.style.width = "100%"
+            selectkategori.id = "selectkategori"
+            selectkategori.required = "required"
+
+            var optionkategori = document.createElement("option");
+            optionkategori.setAttribute('value',artikel.categories[0]._id)
+            optionkategori.innerText= artikel.categories[0].title
+            selectkategori.appendChild(optionkategori)
+
+            let API_URLs = "https://bookmarks-apis.herokuapp.com/api/article-categories/";
+            axios
+                .get(API_URLs)
+                .then(function(responses){
+                var data = responses.data
+                for( let index = 0 ; index < data.length; index++){
+                    var titleOption = document.createElement('option')
+                    titleOption.setAttribute('value',data[index]._id)
+                    titleOption.innerText = data[index].title
+                    selectkategori.appendChild(titleOption)
+                }
+                })
+                .catch(tampungError)
+
+            var editorkategori = document.createElement("textarea");
+            editorkategori.id = "editor1"
+            editorkategori.name = "editor1"
+            editorkategori.setAttribute("value",artikel.description)
+            editorkategori.innerHTML = artikel.description;
+            editorkategori.rows = "10"
+            editorkategori.cols = "170"
+
+            var btnsubmit = document.createElement("button");
+            btnsubmit.setAttribute("class","btn btn-primary");
+            btnsubmit.setAttribute("type","submit");
+            btnsubmit.id = "idbtnsubmit";
+            btnsubmit.innerText = "Edit Artikel"
+
+            formgroup.appendChild(label);
+            formgroup.appendChild(inputtitle);
+            formgroup2.appendChild(label2);
+            formgroup2.appendChild(selectkategori);
+            formgroup3.appendChild(label3);
+            boxbody.appendChild(formgroup);
+            boxbody.appendChild(formgroup2);
+            boxbody.appendChild(formgroup3);
+            boxbody.appendChild(editorkategori)
+            boxfooter.appendChild(btnsubmit);
+            form.appendChild(boxbody);
+            form.appendChild(boxfooter);
+            box.appendChild(form);
+            col.appendChild(box);
+            row.appendChild(col);
+            isicontent.appendChild(row);
+            headercontent.appendChild(h1);
+            contentWrapper.appendChild(headercontent);
+            contentWrapper.appendChild(isicontent);
+
+            var formadd = document.getElementById("formadd");
+            formadd.addEventListener("submit", function(event) {
+                var tmp=0;
+                for( let index = 0 ;index < artikel.length; index++){
+                    var inputtitle = document.getElementById('idinputtitle').value
+                    if ( artikel[index].title.toLowerCase() == inputtitle.toLowerCase() ){
+                        tmp++;
+                    }
+                }
+                if(tmp == 0){
+                var answer = confirm("apa anda ingin mengeditnya ?");
+                if (answer) {
+                        var inputtitle = document.getElementById('idinputtitle').value
+                        var kategori = document.getElementById('selectkategori').value
+                        var deskripsi = document.getElementById('editor1').value
+                        var artikeliurl = "https://bookmarks-apis.herokuapp.com/api/articles/"+idartikel+"/"
+                        console.log(kategori)
+                        axios
+                        .put(artikeliurl, {
+                        title: inputtitle,
+                        description: deskripsi,
+                        categories: [kategori]
+                        })
+                        .then()
+                        .catch(tampungError);
+                        
+                        slashpageeditartikel();
+                        event.preventDefault();
+                    }else{
+                        event.preventDefault();
+                    }
+                }else{
+                alert("Sorry, this Artikel title already exists")
+                event.preventDefault();
+                }
+            });
+
+        }, 300);
+    }
+
     function formeditkategori(response){
         clearContent();
         let kategori = response.data;
@@ -680,7 +841,7 @@
         setTimeout(function() {
             removeLoad()
             var h1 = document.createElement("h1");
-            h1.innerText = "Add Kategori";
+            h1.innerText = "Edit Kategori";
 
             var row = document.createElement("row");
             row.setAttribute("class","row");
@@ -720,7 +881,7 @@
             btnsubmit.setAttribute("class","btn btn-primary");
             btnsubmit.setAttribute("type","submit");
             btnsubmit.id = "idbtnsubmit";
-            btnsubmit.innerText = "Add Kategori"
+            btnsubmit.innerText = "Edit Kategori"
 
             formgroup.appendChild(label);
             formgroup.appendChild(inputtitle);
@@ -968,6 +1129,53 @@
 
         }, 300);
     }
+    
+    function slashpageeditartikel(){
+        clearContent();
+        setTimeout(function() {
+            removeLoad()
+
+            var row = document.createElement("row");
+            row.setAttribute("class","row");
+
+            var col = document.createElement("div");
+            col.setAttribute("class","col-md-12 col-sm-12 col-xs-12");
+
+            var box = document.createElement("div");
+            box.setAttribute("class","box");
+
+            var boxbody = document.createElement("div");
+            boxbody.setAttribute("class","box-body");
+
+            var boxfooter = document.createElement("div");
+            boxfooter.setAttribute("class","box-footer");
+
+            var h3 = document.createElement("h3");
+            h3.innerText = "Anda Berhasil Mengubah, Silakan Kembali Ke List Artikel"
+
+            var btnsubmit = document.createElement("button");
+            btnsubmit.setAttribute("class","btn btn-primary");
+            btnsubmit.setAttribute("type","submit");
+            btnsubmit.id = "idbtnsubmit";
+            btnsubmit.innerText = "Back To List Artikel"
+
+            boxbody.appendChild(h3);
+            boxfooter.appendChild(btnsubmit);
+            box.appendChild(boxbody);
+            box.appendChild(boxfooter);
+            col.appendChild(box);
+            row.appendChild(col);
+            isicontent.appendChild(row);
+            contentWrapper.appendChild(isicontent);
+
+            var idbtnsubmit = document.getElementById('idbtnsubmit')
+            idbtnsubmit.addEventListener('click',function(){
+                var API_URL = "https://bookmarks-apis.herokuapp.com/api/articles/"
+                viewArtikel(API_URL)
+            })
+
+        }, 300);
+    }
 
     function slashpageeditkategori(){
         clearContent();
@@ -1018,7 +1226,7 @@
 
     function tampungError(error) {
         // hide loading
-        console.log(error)
+        console.log(error.message)
     }
 
     loading();
@@ -1026,6 +1234,13 @@
     .get(url.base+"/article-categories/")
     .then(listkategori)
     .catch(tampungError);
+
+    function editArtikel(API_URL){
+        axios
+        .get(API_URL)
+        .then(formeditartikel)
+        .catch(tampungError);
+    }
 
     function editKategori(API_URL){
         axios
